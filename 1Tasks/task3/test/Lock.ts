@@ -22,7 +22,6 @@ describe("Test", function () {
     it("should allow a user to contribute to the contract", async function () {
         await contract.connect(owner).contribute({value: ethers.utils.parseEther("0.1")});
         expect(await contract.contributions(owner.getAddress())).to.equal(ethers.utils.parseEther("0.1"));
-        expect(await contract.totalAmount()).to.equal(ethers.utils.parseEther("0.1"));
     });
     
     it("should not allow a user to contribute twice", async function () {
@@ -36,7 +35,6 @@ describe("Test", function () {
         await contract.connect(owner).unlock();
         await contract.connect(owner).contribute({value: ethers.utils.parseEther("0.1")});
         expect(await contract.contributions(owner.getAddress())).to.equal(ethers.utils.parseEther("0.1"));
-        expect(await contract.totalAmount()).to.equal(ethers.utils.parseEther("0.1"));
     });
     
     it("should not allow a user to contribute below the minimum amount", async function () {
@@ -74,6 +72,40 @@ describe("unlock()", function () {
     it("should not allow a non-creator to unlock the contract", async function () {
         await contract.lock();
         await expect(contract.connect(otherAccount).unlock()).to.be.revertedWith("Only the creator can perform this action");
+    });
+});
+describe("transfer()", function () {
+    it("should transfer funds to the creator after the contract period has ended", async function () {
+        const ownerBalance = await ethers.provider.getBalance(owner.getAddress());
+
+        await contract.connect(otherAccount).contribute({value: ethers.utils.parseEther("0.2")});
+        await ethers.provider.send("evm_increaseTime", [172800]); 
+
+        const tx = await contract.connect(owner).transfer();
+
+        const receipt = await tx.wait();
+        const gasUsed = tx.gasPrice?.mul(receipt.gasUsed);
+
+        expect(await ethers.provider.getBalance(contract.address)).to.equal(ethers.utils.parseEther("0"));
+        expect(await (await ethers.provider.getBalance(owner.getAddress()))).to.equal(ethers.utils.parseEther("0.2").add(ownerBalance).sub(gasUsed));
+    });
+    
+    it("should not allow the creator to transfer funds before the contract period has ended", async function () {
+        await contract.connect(otherAccount).contribute({value: ethers.utils.parseEther("0.1")});
+        await expect(contract.transfer()).to.be.revertedWith("Crowdfunding is still ongoing");
+    });
+    
+    it("should not allow a non-creator to transfer funds", async function () {
+        await contract.connect(otherAccount).contribute({value: ethers.utils.parseEther("0.1")});
+        await ethers.provider.send("evm_increaseTime", [172800]); 
+        await expect(contract.connect(otherAccount).transfer()).to.be.revertedWith("Only the creator can perform this action");
+    });
+    
+    it("should not allow the creator to transfer funds if the contract is locked", async function () {
+        await contract.connect(otherAccount).contribute({value: ethers.utils.parseEther("0.1")});
+        await ethers.provider.send("evm_increaseTime", [172800]); 
+        await contract.lock();
+        await expect(contract.transfer()).to.be.revertedWith("Contract is locked");
     });
 });
 });

@@ -4,7 +4,6 @@ contract Lock {
     
     address public creator; 
     uint public endTime; 
-    uint public totalAmount; 
     
     mapping(address => bool) public hasParticipated; 
     mapping(address => uint) public contributions; 
@@ -37,7 +36,6 @@ contract Lock {
         
         hasParticipated[msg.sender] = true;
         contributions[msg.sender] = msg.value;
-        totalAmount += msg.value;
     }
     
     function lock() public onlyCreator {
@@ -56,13 +54,5 @@ contract Lock {
         
         bool success = payable(creator).send(balance); 
         require(success, "Transfer failed");
-    }
-    
-    function withdraw() public onlyCreator onlyUnlocked {
-        uint amount = totalAmount;
-        totalAmount = 0; 
-        
-        bool success = payable(creator).send(amount); 
-        require(success, "Withdrawal failed");
     }
 }
