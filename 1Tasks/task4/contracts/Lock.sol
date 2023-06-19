@@ -38,14 +38,14 @@ contract Lock {
             require(voter.option == option, "Cannot change vote.");
         }
 
-        optionNVotes[option] += (msg.value / 1000000000000000000);
+        optionNVotes[option] += msg.value;
 
         if(optionNVotes[option] > winningAmmount) {
             wOption = option;
             winningAmmount = optionNVotes[option];
         }
 
-        voter.amount += (msg.value / 1000000000000000000);
+        voter.amount += msg.value;
         totalAmount += msg.value;
     }
     
