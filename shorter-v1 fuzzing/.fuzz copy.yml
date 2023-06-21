@@ -1,0 +1,38 @@
+# .fuzz_token.yml
+
+fuzz:
+    # Tell the CLI where to find the compiled contracts and compilation artifacts
+    build_directory: artifacts
+    ide: "hardhat"
+
+    # The following address is going to be the main target for the fuzzing campaign
+    deployed_contract_address: "0xe78A0F7E598Cc8b0Bb87894B0F60dD2a88d6a8Ab" 
+
+    # additional_contracts_addresses:
+    #     - "0xcfeb869f69431e42cdb54a4f4f105c19c080a601"
+    #     - "0x5b1869d9a4c187f2eaa108f3062412ecf0526b24"
+    #     - "0x254dffcd3277c0b1660f6d42efbb754edababc2b"
+    
+    # We'll do fuzzing with 8 cores 🚀
+    number_of_cores: 4
+  
+    # Run the campaign for just 30 minutes
+    time_limit: 10m 
+
+    # Put the campaign in the Shorter test project
+    project: "Shorter test"
+    
+    # When the campaign is created it'll get a name <prefix>_<random_characters>
+    campaign_name_prefix: "Shorter campaign"
+    # Point to your ganache node which holds the seed 🌱
+    rpc_url: "http://localhost:8545"
+
+    key: "MXczMzBnN1NUVFJmRU5PUTh0QUlwT0s4S005d2ZnWmY6OmRpbGlnZW5jZS51cy5hdXRoMC5jb20=::v1.MbdODrgaFRlvdSI8qhHwH6Q09BF9-rCjgwNbpzabu4GnqfvU7fFmQK64BgfsH4gn7AmU2s5ny3t_b9FgmDsegEA"
+
+    # This is the contract that the campaign will show coverage for/ map issues to etc
+    # It's a list of all the relevant contracts (don't worry about dependencies, we'll get those automatically 🙌)
+    targets:
+        - "contracts/criteria/Affinity.sol"
+        # - "contracts/ShorterFactory.sol"
+        # - "contracts/ShorterBone.sol"
+        # - "contracts/DexCenter.sol"
